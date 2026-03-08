@@ -1,61 +1,52 @@
+// DOM Elements - Login 
 const usernameInput = document.getElementById('usernameInput');
 const passwordInput = document.getElementById('passwordInput');
+const userHint      = document.getElementById('userHint');
+const passHint      = document.getElementById('passHint');
+const loginBtn      = document.getElementById('loginBtn');
+const loginPage     = document.getElementById('loginPage');
+const dashboard     = document.getElementById('dashboard');
 
-const userHint = document.getElementById('userHint');
-const passHint = document.getElementById('passHint');
+// Simple login validation with demo credentials
+loginBtn.addEventListener('click', () => {
 
-const loginBtn = document.getElementById('loginBtn');
+  userHint.textContent = '';
+  passHint.textContent = '';
 
-loginBtn.addEventListener('click', function () {
-  userHint.innerText = '';
-  passHint.innerText = '';
+  const username = usernameInput.value.trim();
+  const password = passwordInput.value.trim();
 
-  const usernameValue = usernameInput.value.trim();
-  const passwordValue = passwordInput.value.trim();
+  let isValid = true;
 
-  // username validation
-  if (usernameValue === '') {
-    userHint.innerHTML = `<i class="fa-regular fa-circle-xmark"></i> Please enter <span class="text-green-500">'admin'</span> your user name`;
-    userHint.classList.add('text-red-500', 'animate-bounce');
-    return;
-  } else if (usernameValue !== 'admin') {
-    userHint.innerHTML = `<i class="fa-regular fa-circle-xmark"></i> Wrong user name. Please enter 'admin'`;
-    userHint.classList.add('text-red-500', 'animate-bounce');
-    return;
+  // Username check
+  if (!username) {
+    userHint.innerHTML = '<i class="fa-regular fa-circle-xmark text-red-500"></i> Username is required';
+    isValid = false;
+  } else if (username !== 'admin') {
+    userHint.innerHTML = '<i class="fa-regular fa-circle-xmark text-red-500"></i> Invalid username (use: admin)';
+    isValid = false;
   } else {
-    userHint.classList.remove(
-      'text-red-500',
-      'animate-bounce',
-      'text-purple-500'
-    );
-    userHint.classList.add('text-green-500');
-    userHint.innerHTML = `<i class="fa-regular fa-circle-check"></i> Correct Your user name`;
+    userHint.innerHTML = '<i class="fa-regular fa-circle-check text-green-500"></i> Correct username';
   }
 
-  // password validation
-  if (passwordValue === '') {
-    passHint.innerHTML = `<i class="fa-regular fa-circle-xmark"></i> Please enter <span class="text-green-500">'admin123'</span> your password`;
-    passHint.classList.add('text-red-500', 'animate-bounce');
-    return;
-  } else if (passwordValue !== 'admin123') {
-    passHint.innerHTML = `<i class="fa-regular fa-circle-xmark"></i> Wrong password. Please enter 'admin123'`;
-    passHint.classList.add('text-red-500', 'animate-bounce');
-    return;
+  // Password check
+  if (!password) {
+    passHint.innerHTML = '<i class="fa-regular fa-circle-xmark text-red-500"></i> Password is required';
+    isValid = false;
+  } else if (password !== 'admin123') {
+    passHint.innerHTML = '<i class="fa-regular fa-circle-xmark text-red-500"></i> Invalid password (use: admin123)';
+    isValid = false;
   } else {
-    passHint.classList.remove(
-      'text-red-500',
-      'animate-bounce',
-      'text-purple-500'
-    );
-    passHint.classList.add('text-green-500');
-    passHint.innerHTML = `<i class="fa-regular fa-circle-check"></i> Correct Your Password`;
-
-    // redirect after successful login
-    // window.location.href = "./home.html";
-    document.getElementById('loginPage').classList.add('hidden');
-    // document.getElementById('homePage').classList.remove('hidden');
-    document.getElementById('dashboard').classList.remove('hidden')
+    passHint.innerHTML = '<i class="fa-regular fa-circle-check text-green-500"></i> Correct password';
   }
 
-  console.log(usernameValue, passwordValue);
+  if (isValid) {
+    loginPage.classList.add('hidden');
+    dashboard.classList.remove('hidden');
+
+
+    if (typeof fetchAllIssues === 'function') {
+      fetchAllIssues();
+    }
+  }
 });

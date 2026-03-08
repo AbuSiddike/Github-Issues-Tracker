@@ -1,292 +1,229 @@
-const allIssuesBtn = document.getElementById("allIssuesBtn");
-const openIssuesBtn = document.getElementById("openIssuesBtn");
-const closedIssuesBtn = document.getElementById("closedIssuesBtn");
+// DOM Elements - Issues Dashboard
 
-const issuesContainer = document.getElementById("issuesContainer");
-const openIssuesSection = document.getElementById("openIssuesSection");
-const closedIssuesSection = document.getElementById("closedIssuesSection");
+const searchInput = document.getElementById('searchInput');
+const searchBtn = document.getElementById('searchBtn');
+const issuesContainer = document.getElementById('issuesContainer');
+const issueCount = document.getElementById('issueCount');
+const loadingSpinner = document.getElementById('loadingSpinner');
+const errorMessage = document.getElementById('errorMessage');
+const issueModal = document.getElementById('issueModal');
+const modalContent = document.getElementById('modalContent');
 
-const issueCount = document.getElementById("issueCount");
-const issueModal = document.getElementById("issueModal");
-const loadingSpinner = document.getElementById("loadingSpinner");
+const allBtn = document.getElementById('allIssuesBtn');
+const openBtn = document.getElementById('openIssuesBtn');
+const closedBtn = document.getElementById('closedIssuesBtn');
+
+// State
 
 let allIssues = [];
-let openIssues = [];
-let closedIssues = [];
+let currentFilter = 'all';
 
+// Helper Functions
 
-/* ----- Spinner ----- */
+function toggleLoading(show) {
+  loadingSpinner.classList.toggle('hidden', !show);
+  issuesContainer.classList.toggle('hidden', show);
+  errorMessage?.classList.add('hidden');
+}
 
-function toggleSpinner(show) {
-  if (show) {
-    loadingSpinner.classList.remove("hidden");
-    issuesContainer.classList.add("hidden");
-  } else {
-    loadingSpinner.classList.add("hidden");
-    issuesContainer.classList.remove("hidden");
+function showError(msg) {
+  if (errorMessage) {
+    errorMessage.textContent = msg;
+    errorMessage.classList.remove('hidden');
   }
+  toggleLoading(false);
 }
 
-
-/* ----- Issue Counter ----- */
-
-function updateIssueCounter(type) {
-  if (type === "all") {
-    issueCount.innerText = allIssues.length;
-  } else if (type === "open") {
-    issueCount.innerText = openIssues.length;
-  } else if (type === "closed") {
-    issueCount.innerText = closedIssues.length;
-  }
+function updateIssueCount(count) {
+  if (issueCount) issueCount.textContent = count;
 }
 
+function getFilteredIssues() {
+  if (currentFilter === 'all') return allIssues;
+  return allIssues.filter((issue) => issue.status === currentFilter);
+}
 
-/* ----- Filter Buttons ----- */
-
-document
-  .getElementById("filterButtons")
-  .addEventListener("click", (event) => {
-
-    const clicked = event.target;
-    const buttons = document.querySelectorAll("#filterButtons .btn");
-
-    buttons.forEach(btn => btn.classList.remove("btn-primary"));
-    clicked.classList.add("btn-primary");
-
-    if (!clicked.classList.contains("btn")) return;
-
-    if (clicked.id === "allIssuesBtn") {
-      issuesContainer.classList.remove("hidden");
-      openIssuesSection.classList.add("hidden");
-      closedIssuesSection.classList.add("hidden");
-      updateIssueCounter("all");
-    }
-
-    if (clicked.id === "openIssuesBtn") {
-      issuesContainer.classList.add("hidden");
-      openIssuesSection.classList.remove("hidden");
-      closedIssuesSection.classList.add("hidden");
-      updateIssueCounter("open");
-    }
-
-    if (clicked.id === "closedIssuesBtn") {
-      issuesContainer.classList.add("hidden");
-      openIssuesSection.classList.add("hidden");
-      closedIssuesSection.classList.remove("hidden");
-      updateIssueCounter("closed");
-    }
-  });
-
-
-/* ----- Load All Issues ----- */
-
-async function fetchAllIssues() {
-
-  toggleSpinner(true);
-
-  const response = await fetch(
-    "https://phi-lab-server.vercel.app/api/v1/lab/issues"
+function setActiveTab(btn) {
+  [allBtn, openBtn, closedBtn].forEach((b) =>
+    b?.classList.remove('btn-primary')
   );
-
-  const result = await response.json();
-
-  renderIssues(result.data);
-
-  toggleSpinner(false);
+  btn?.classList.add('btn-primary');
 }
 
-
-/* ----- Load Single Issue ----- */
-
-async function fetchSingleIssue(id) {
-
-  toggleSpinner(true);
-
-  const response = await fetch(
-    `https://phi-lab-server.vercel.app/api/v1/lab/issue/${id}`
-  );
-
-  const result = await response.json();
-
-  showIssueModal(result.data);
-
-  toggleSpinner(false);
+function showNoSearchResults() {
+  issuesContainer.innerHTML = `
+    <div class="text-center py-16 text-gray-500">
+      <h3 class="text-xl font-semibold mb-2">No issues found</h3>
+      <p>Try searching with a different keyword.</p>
+    </div>
+  `;
+  updateIssueCount(0);
 }
 
+// Card Creator
 
-/* ----- Modal ----- */
+function createIssueCard(issue) {
+  const card = document.createElement('div');
+  card.className = `card bg-base-100 shadow hover:shadow-lg transition-shadow cursor-pointer border-t-4 ${
+    issue.status === 'open' ? 'border-green-500' : 'border-purple-500'
+  }`;
 
-function showIssueModal(issue) {
+  card.innerHTML = `
+    <div class="card-body space-y-3">
+      <div class="flex justify-between items-start gap-2">
+        <h3 class="text-xl font-bold flex-1 line-clamp-2">${issue.title}</h3>
+        <span class="badge badge-neutral uppercase">${issue.priority}</span>
+      </div>
 
-  const modalContent = document.getElementById("modalContent");
-  modalContent.innerHTML = "";
+      <p class="text-gray-600 line-clamp-3">${issue.description || 'No description provided.'}</p>
 
-  const modalCard = document.createElement("div");
+      <div class="flex flex-wrap gap-2">
+        ${issue.labels?.map((label) => `<div class="badge badge-outline">${label}</div>`).join('') || ''}
+      </div>
 
-  modalCard.innerHTML = `
-  <div class="modal-box">
+      <div class="divider my-1"></div>
 
-  <h3 class="text-xl font-bold">${issue.title}</h3>
-
-  <div class="flex items-center gap-3 mb-3">
-
-  <p class="text-white uppercase rounded-full px-3 py-1 ${
-    issue.status === "open" ? "bg-green-500" : "bg-purple-500"
-  }">
-  ${issue.status}
-  </p>
-
-  <p>Opened by <span>${issue.author}</span></p>
-  <p>${new Date(issue.createdAt).toLocaleDateString("en-GB")}</p>
-
-  </div>
-
-  <div class="flex gap-2 my-3">
-
-  <p class="bg-red-100 border border-red-500 text-red-500 rounded-full px-2 font-bold">
-  <i class="fa-solid fa-bug"></i> ${issue.labels[0]}
-  </p>
-
-  <p class="bg-yellow-100 border border-yellow-500 text-yellow-500 rounded-full px-2 font-bold">
-  <i class="fa-regular fa-life-ring"></i> ${issue.labels[1]}
-  </p>
-
-  </div>
-
-  <p>${issue.description}</p>
-
-  <div class="flex justify-between my-3">
-
-  <div>
-  <p>assignee:</p>
-  <p class="text-xl font-bold">${issue.assignee}</p>
-  </div>
-
-  <div class="text-center">
-  <p>priority</p>
-  <p class="bg-red-500 text-white px-3 rounded-full uppercase">
-  ${issue.priority}
-  </p>
-  </div>
-
-  </div>
-
-  <div class="modal-action">
-  <form method="dialog">
-  <button class="btn">Close</button>
-  </form>
-  </div>
-
-  </div>
+      <div class="text-sm text-gray-500 flex flex-col gap-1">
+        <div>#${issue.id} opened by <strong>${issue.author}</strong></div>
+        <div>${new Date(issue.createdAt).toLocaleDateString('en-GB')}</div>
+      </div>
+    </div>
   `;
 
-  modalContent.append(modalCard);
-  issueModal.showModal();
+  card.addEventListener('click', () => showIssueModal(issue));
+  return card;
 }
 
+// Render Issues
 
-/* ----- Search ----- */
+function renderIssues(issuesList) {
+  issuesContainer.innerHTML = '';
 
-async function searchIssues() {
+  if (!issuesList || issuesList.length === 0) {
+    issuesContainer.innerHTML =
+      '<p class="text-center py-10 text-gray-500">No issues to display.</p>';
+  } else {
+    issuesList.forEach((issue) => {
+      issuesContainer.appendChild(createIssueCard(issue));
+    });
+  }
 
-  const searchField = document.getElementById("searchInput");
-  const query = searchField.value;
+  updateIssueCount(issuesList?.length || 0);
+}
 
-  if (query.trim() === "") {
-    fetchAllIssues();
+// Modal
+
+function showIssueModal(issue) {
+  if (!modalContent) return;
+
+  modalContent.innerHTML = `
+    <h3 class="text-2xl font-bold mb-4">${issue.title}</h3>
+
+    <div class="flex flex-wrap gap-3 mb-4">
+      <div class="badge ${issue.status === 'open' ? 'badge-success' : 'badge-secondary'} uppercase">
+        ${issue.status}
+      </div>
+      <div class="text-sm">
+        Opened by <strong>${issue.author}</strong> • ${new Date(issue.createdAt).toLocaleDateString('en-GB')}
+      </div>
+    </div>
+
+    <p class="mb-6 whitespace-pre-wrap">${issue.description || 'No description available.'}</p>
+
+    <div class="flex flex-wrap gap-2 mb-6">
+      ${issue.labels?.map((l) => `<div class="badge badge-outline">${l}</div>`).join('') || '<span class="text-gray-500">No labels</span>'}
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+      <div>
+        <p class="font-medium">Assignee</p>
+        <p class="mt-1">${issue.assignee || 'Unassigned'}</p>
+      </div>
+      <div>
+        <p class="font-medium">Priority</p>
+        <p class="mt-1 uppercase font-medium">${issue.priority}</p>
+      </div>
+    </div>
+  `;
+
+  issueModal?.showModal();
+}
+
+// Fetch Functions
+
+async function fetchAllIssues() {
+  toggleLoading(true);
+
+  try {
+    const response = await fetch(
+      'https://phi-lab-server.vercel.app/api/v1/lab/issues'
+    );
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    const data = await response.json();
+    if (data.status !== 'success') throw new Error(data.message || 'API error');
+
+    allIssues = data.data || [];
+    renderIssues(getFilteredIssues());
+  } catch (err) {
+    console.error(err);
+    showError(`Failed to load issues: ${err.message}`);
+  } finally {
+    toggleLoading(false);
+  }
+}
+
+async function searchIssues(query) {
+  if (!query.trim()) {
+    showNoSearchResults();
     return;
   }
 
-  toggleSpinner(true);
+  toggleLoading(true);
 
-  const response = await fetch(
-    `https://phi-lab-server.vercel.app/api/v1/lab/issues/search?q=${query}`
-  );
+  try {
+    const url = `https://phi-lab-server.vercel.app/api/v1/lab/issues/search?q=${encodeURIComponent(query)}`;
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-  const result = await response.json();
+    const data = await response.json();
+    if (data.status !== 'success')
+      throw new Error(data.message || 'Search error');
 
-  renderIssues(result.data);
-
-  toggleSpinner(false);
+    const results = data.data || [];
+    allIssues = results; 
+    currentFilter = 'all'; 
+    setActiveTab(allBtn);
+    renderIssues(results);
+  } catch (err) {
+    console.error(err);
+    showError(`Search failed: ${err.message}`);
+  } finally {
+    toggleLoading(false);
+  }
 }
 
-document
-  .getElementById("searchInput")
-  .addEventListener("input", searchIssues);
+// Event Listeners (dashboard only)
 
+// Tabs
+document.getElementById('filterButtons')?.addEventListener('click', (e) => {
+  if (!e.target.classList.contains('btn')) return;
 
-/* ----- Render Cards ----- */
+  if (e.target.id === 'allIssuesBtn') currentFilter = 'all';
+  if (e.target.id === 'openIssuesBtn') currentFilter = 'open';
+  if (e.target.id === 'closedIssuesBtn') currentFilter = 'closed';
 
-function renderIssues(issues) {
+  setActiveTab(e.target);
+  renderIssues(getFilteredIssues());
+});
 
-  issuesContainer.innerHTML = "";
-  openIssuesSection.innerHTML = "";
-  closedIssuesSection.innerHTML = "";
+searchBtn?.addEventListener('click', () => {
+  const query = searchInput?.value.trim() || '';
+  searchIssues(query);
+});
 
-  allIssues = [];
-  openIssues = [];
-  closedIssues = [];
-
-  issues.forEach(issue => {
-
-    allIssues.push(issue);
-
-    const card = document.createElement("div");
-
-    card.innerHTML = `
-    <div onclick="fetchSingleIssue(${issue.id})"
-    class="card card-body shadow space-y-4 h-full border-t-4 ${
-      issue.status === "open" ? "border-green-500" : "border-purple-500"
-    }">
-
-    <div class="flex justify-between">
-    <img class="w-10 h-10" src="./assets/Open-Status.png">
-    <p class="bg-red-100 text-red-500 font-bold px-6 py-2 rounded-full">
-    ${issue.priority}
-    </p>
-    </div>
-
-    <div>
-    <h2 class="text-2xl font-bold">${issue.title}</h2>
-    <p class="text-gray-400 line-clamp-2">${issue.description}</p>
-    </div>
-
-    <div class="flex gap-2">
-
-    <p class="bg-red-100 border border-red-500 text-red-500 px-2 rounded-full font-bold">
-    <i class="fa-solid fa-bug"></i> ${issue.labels[0]}
-    </p>
-
-    <p class="bg-yellow-100 border border-yellow-500 text-yellow-500 px-2 rounded-full font-bold">
-    <i class="fa-regular fa-life-ring"></i> ${issue.labels[1]}
-    </p>
-
-    </div>
-
-    <div class="divider"></div>
-
-    <div>
-    <p>#1 by ${issue.author}</p>
-    <p>${new Date(issue.updatedAt).toLocaleDateString("en-GB")}</p>
-    </div>
-
-    </div>
-    `;
-
-    if (issue.status === "open") {
-      openIssues.push(issue);
-      openIssuesSection.append(card.cloneNode(true));
-    }
-
-    if (issue.status === "closed") {
-      closedIssues.push(issue);
-      closedIssuesSection.append(card.cloneNode(true));
-    }
-
-    issuesContainer.append(card);
-  });
-
-  updateIssueCounter("all");
-}
-
-fetchAllIssues();
+searchInput?.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    searchBtn?.click();
+  }
+});
