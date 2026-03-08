@@ -8,34 +8,70 @@
     <link rel="stylesheet" href="./tailwind_styles/output.css" />
   </head>
   <body class="bg-gray-100 flex items-center justify-center min-h-screen">
-    <div class="card w-96 bg-base-100 shadow-xl">
-      <div class="card-body">
-        <img src="./assets/github-logo.png" alt="Logo" class="w-30 mx-auto mb-2" />
+    <!-- Login Section -->
+    <section class="flex items-center justify-center min-h-screen">
+      <div class="hero">
+        <div class="hero-content flex-col">
+          <div class="card bg-base-100 shadow-2xl w-full p-6 md:p-10">
+            <!-- Header -->
+            <div class="text-center space-y-2 mb-4">
+              <img
+                src="./assets/github-logo.png"
+                alt="github logo"
+                class="mx-auto"
+              />
+              <h2 class="text-3xl font-bold">GitHub Issues Tracker</h2>
+              <p>Sign in to manage your issues.</p>
+            </div>
 
-        <h2 class="text-2xl font-bold text-center">GitHub Issues Tracker</h2>
+            <!-- Form -->
+            <div class="card-body p-0">
+              <fieldset class="fieldset space-y-2">
+                <!-- Username -->
+                <label class="label">Username</label>
+                <input
+                  id="usernameInput"
+                  type="text"
+                  placeholder="Enter Username"
+                  class="input outline-none"
+                />
+                <p id="userHint" class="text-purple-500">Default: admin</p>
 
-        <p class="text-center text-gray-500">Sign in to manage your issues</p>
+                <!-- Password -->
+                <label class="label mt-2">Password</label>
+                <input
+                  id="passwordInput"
+                  type="password"
+                  placeholder="Password"
+                  class="input outline-none"
+                />
+                <p id="passHint" class="text-purple-500">Default: admin123</p>
 
-        <input
-          id="username"
-          type="text"
-          placeholder="Username"
-          class="input input-bordered w-full"
-        />
+                <!-- Button -->
+                <button id="loginBtn" class="btn btn-primary mt-4">
+                  Sign In
+                </button>
 
-        <input
-          id="password"
-          type="password"
-          placeholder="Password"
-          class="input input-bordered w-full"
-        />
+                <!-- Divider -->
+                <div class="divider">OR</div>
 
-        <button onclick="login()" class="btn btn-primary w-full">
-          Sign In
-        </button>
+                <!-- Demo credentials -->
+                <div class="text-center">
+                  <p class="mb-4 text-sm md:text-lg">Demo Credentials:</p>
 
-        <p class="text-sm text-center mt-2">Demo Credentials</p>
+                  <p class="text-sm md:text-lg">
+                    <span class="font-bold">UserName:</span> admin
+                  </p>
+
+                  <p class="text-sm md:text-lg">
+                    <span class="font-bold">Password:</span> admin123
+                  </p>
+                </div>
+              </fieldset>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
+    </section>
   </body>
 </html>
