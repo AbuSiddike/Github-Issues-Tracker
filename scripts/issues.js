@@ -15,7 +15,7 @@ let openIssues = [];
 let closedIssues = [];
 
 
-/* ------------------ Spinner ------------------ */
+/* ----- Spinner ----- */
 
 function toggleSpinner(show) {
   if (show) {
@@ -28,7 +28,7 @@ function toggleSpinner(show) {
 }
 
 
-/* ------------------ Issue Counter ------------------ */
+/* ----- Issue Counter ----- */
 
 function updateIssueCounter(type) {
   if (type === "all") {
@@ -41,7 +41,7 @@ function updateIssueCounter(type) {
 }
 
 
-/* ------------------ Filter Buttons ------------------ */
+/* ----- Filter Buttons ----- */
 
 document
   .getElementById("filterButtons")
@@ -78,7 +78,7 @@ document
   });
 
 
-/* ------------------ Load All Issues ------------------ */
+/* ----- Load All Issues ----- */
 
 async function fetchAllIssues() {
 
@@ -96,7 +96,7 @@ async function fetchAllIssues() {
 }
 
 
-/* ------------------ Load Single Issue ------------------ */
+/* ----- Load Single Issue ----- */
 
 async function fetchSingleIssue(id) {
 
@@ -114,7 +114,7 @@ async function fetchSingleIssue(id) {
 }
 
 
-/* ------------------ Modal ------------------ */
+/* ----- Modal ----- */
 
 function showIssueModal(issue) {
 
@@ -185,7 +185,7 @@ function showIssueModal(issue) {
 }
 
 
-/* ------------------ Search ------------------ */
+/* ----- Search ----- */
 
 async function searchIssues() {
 
@@ -215,7 +215,7 @@ document
   .addEventListener("input", searchIssues);
 
 
-/* ------------------ Render Cards ------------------ */
+/* ----- Render Cards ----- */
 
 function renderIssues(issues) {
 
@@ -288,8 +288,5 @@ function renderIssues(issues) {
 
   updateIssueCounter("all");
 }
-
-
-/* ------------------ Initial Load ------------------ */
 
 fetchAllIssues();
