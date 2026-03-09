@@ -1,11 +1,9 @@
-// DOM Elements - Login 
+// DOM Elements - Login
 const usernameInput = document.getElementById('usernameInput');
 const passwordInput = document.getElementById('passwordInput');
-const userHint      = document.getElementById('userHint');
-const passHint      = document.getElementById('passHint');
-const loginBtn      = document.getElementById('loginBtn');
-const loginPage     = document.getElementById('loginPage');
-const dashboard     = document.getElementById('dashboard');
+const userHint = document.getElementById('userHint');
+const passHint = document.getElementById('passHint');
+const loginBtn = document.getElementById('loginBtn');
 
 // Simple login validation with demo credentials
 loginBtn.addEventListener('click', () => {
@@ -20,33 +18,38 @@ loginBtn.addEventListener('click', () => {
 
   // Username check
   if (!username) {
-    userHint.innerHTML = '<i class="fa-regular fa-circle-xmark text-red-500"></i> Username is required';
+    userHint.innerHTML =
+      '<i class="fa-regular fa-circle-xmark text-red-500"></i> Username is required';
     isValid = false;
   } else if (username !== 'admin') {
-    userHint.innerHTML = '<i class="fa-regular fa-circle-xmark text-red-500"></i> Invalid username (use: admin)';
+    userHint.innerHTML =
+      '<i class="fa-regular fa-circle-xmark text-red-500"></i> Invalid username (use: admin)';
     isValid = false;
   } else {
-    userHint.innerHTML = '<i class="fa-regular fa-circle-check text-green-500"></i> Correct username';
+    userHint.innerHTML =
+      '<i class="fa-regular fa-circle-check text-green-500"></i> Correct username';
   }
 
   // Password check
   if (!password) {
-    passHint.innerHTML = '<i class="fa-regular fa-circle-xmark text-red-500"></i> Password is required';
+    passHint.innerHTML =
+      '<i class="fa-regular fa-circle-xmark text-red-500"></i> Password is required';
     isValid = false;
   } else if (password !== 'admin123') {
-    passHint.innerHTML = '<i class="fa-regular fa-circle-xmark text-red-500"></i> Invalid password (use: admin123)';
+    passHint.innerHTML =
+      '<i class="fa-regular fa-circle-xmark text-red-500"></i> Invalid password (use: admin123)';
     isValid = false;
   } else {
-    passHint.innerHTML = '<i class="fa-regular fa-circle-check text-green-500"></i> Correct password';
+    passHint.innerHTML =
+      '<i class="fa-regular fa-circle-check text-green-500"></i> Correct password';
   }
 
+  // If login successful → go to dashboard
   if (isValid) {
-    loginPage.classList.add('hidden');
-    dashboard.classList.remove('hidden');
+    
+    localStorage.setItem('isLoggedIn', 'true');
 
-
-    if (typeof fetchAllIssues === 'function') {
-      fetchAllIssues();
-    }
+    
+    window.location.href = 'dashboard.html';
   }
 });
