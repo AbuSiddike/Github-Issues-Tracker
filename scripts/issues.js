@@ -18,6 +18,50 @@ const closedBtn = document.getElementById('closedIssuesBtn');
 let allIssues = [];
 let currentFilter = 'all';
 
+// Label UI Config
+
+function getLabelConfig(label) {
+  const lower = label.toLowerCase();
+
+  if (lower === 'bug') {
+    return {
+      wrapper: 'bg-red-50 border border-red-200',
+      text: 'text-red-500',
+      icon: `<i class="fa-solid fa-bug text-red-500 w-4 h-4"></i>`,
+    };
+  }
+
+  if (lower === 'help wanted') {
+    return {
+      wrapper: 'bg-orange-50 border border-orange-200',
+      text: 'text-orange-400',
+      icon: `<i class="fa-solid fa-life-ring text-orange-400 w-4 h-4"></i>`,
+    };
+  }
+
+  if (lower === 'enhancement') {
+    return {
+      wrapper: 'bg-green-50 border border-green-200',
+      text: 'text-green-500',
+      icon: `<i class="fa-solid fa-bahai text-green-500 w-4 h-4"></i>`,
+    };
+  }
+
+  if (lower === 'good first issue') {
+    return {
+      wrapper: 'bg-blue-50 border border-blue-200',
+      text: 'text-blue-500',
+      icon: `<i class="fa-regular fa-star text-blue-500 w-4 h-4"></i>`,
+    };
+  }
+
+  return {
+    wrapper: 'bg-gray-50 border border-gray-200',
+    text: 'text-gray-500',
+    icon: `<i class="fa-solid fa-bars-staggered text-gray-500 w-4 h-4"></i>`,
+  };
+}
+
 // Helper Functions
 
 function toggleLoading(show) {
@@ -60,37 +104,99 @@ function showNoSearchResults() {
   updateIssueCount(0);
 }
 
-// Card Creator
+// Card Creator (Updated UI)
 
 function createIssueCard(issue) {
   const card = document.createElement('div');
-  card.className = `card bg-base-100 shadow hover:shadow-lg transition-shadow cursor-pointer border-t-4 ${
-    issue.status === 'open' ? 'border-green-500' : 'border-purple-500'
-  }`;
+
+  const priorityColor =
+    issue.priority?.toLowerCase() === 'high'
+      ? '#EF4444'
+      : issue.priority?.toLowerCase() === 'medium'
+        ? '#F59E0B'
+        : '#9CA3AF';
+
+  const priorityBg =
+    issue.priority?.toLowerCase() === 'high'
+      ? '#EF444410'
+      : issue.priority?.toLowerCase() === 'medium'
+        ? '#F59E0B10'
+        : '#9CA3AF10';
+
+  const statusColor = issue.status === 'open' ? '#00A96E' : '#A855F7';
+
+  const statusIcon =
+    issue.status === 'open'
+      ? `<div class="w-7 h-7 flex items-center justify-center text-green-500 bg-green-100 rounded-full">
+          <i class="fa-regular fa-circle-dot"></i>
+        </div>`
+      : `<div class="w-7 h-7 flex items-center justify-center text-purple-500 bg-purple-100 rounded-full">
+          <i class="fa-regular fa-circle-check"></i>
+        </div>`;
+
+  const labelsHTML =
+    issue.labels
+      ?.map((label) => {
+        const { wrapper, text, icon } = getLabelConfig(label);
+
+        return `
+          <div class="flex items-center gap-1 ${wrapper} px-2 py-1 rounded-full">
+            ${icon}
+            <span class="${text} text-[10px] uppercase">${label}</span>
+          </div>
+        `;
+      })
+      .join('') || '';
 
   card.innerHTML = `
-    <div class="card-body space-y-3">
-      <div class="flex justify-between items-start gap-2">
-        <h3 class="text-xl font-bold flex-1 line-clamp-2">${issue.title}</h3>
-        <span class="badge badge-neutral uppercase">${issue.priority}</span>
+    <div class="cursor-pointer bg-white rounded-xl h-full shadow-sm border border-gray-100 overflow-hidden">
+
+      <div style="background-color:${statusColor}" class="h-1.5 w-full"></div>
+
+      <div class="p-6">
+
+        <div class="flex justify-between items-center mb-4">
+
+          ${statusIcon}
+
+          <span style="color:${priorityColor}; background:${priorityBg}"
+            class="px-6 py-1.5 rounded-full text-sm font-bold tracking-wider">
+            ${issue.priority}
+          </span>
+
+        </div>
+
+        <h2 class="text-[#2c3e50] text-xl font-bold leading-tight mb-3">
+          ${issue.title}
+        </h2>
+
+        <p class="text-slate-400 text-base mb-6">
+          ${issue.description || 'No description provided.'}
+        </p>
+
+        <div class="flex gap-3 flex-wrap">
+          ${labelsHTML}
+        </div>
+
       </div>
 
-      <p class="text-gray-600 line-clamp-3">${issue.description || 'No description provided.'}</p>
+      <div class="border-t border-gray-100"></div>
 
-      <div class="flex flex-wrap gap-2">
-        ${issue.labels?.map((label) => `<div class="badge badge-outline">${label}</div>`).join('') || ''}
+      <div class="p-6 flex justify-between text-slate-500 text-sm">
+        <span>#${issue.id} by ${issue.author}</span>
+        <span>${new Date(issue.createdAt).toLocaleDateString()}</span>
       </div>
 
-      <div class="divider my-1"></div>
-
-      <div class="text-sm text-gray-500 flex flex-col gap-1">
-        <div>#${issue.id} opened by <strong>${issue.author}</strong></div>
-        <div>${new Date(issue.createdAt).toLocaleDateString('en-GB')}</div>
+      <div class="px-6 pb-6 flex justify-between text-slate-500 text-sm">
+        <span>Assignee: ${issue.assignee || 'N/A'}</span>
+        <span>Updated: ${new Date(issue.updatedAt).toLocaleDateString()}</span>
       </div>
+
     </div>
   `;
 
   card.addEventListener('click', () => showIssueModal(issue));
+
   return card;
 }
 
@@ -111,38 +217,85 @@ function renderIssues(issuesList) {
   updateIssueCount(issuesList?.length || 0);
 }
 
-// Modal
+// Modal (Updated UI)
 
 function showIssueModal(issue) {
   if (!modalContent) return;
 
+  const statusColor = issue.status === 'open' ? '#00A96E' : '#A855F7';
+
+  const priorityColor =
+    issue.priority?.toLowerCase() === 'high'
+      ? '#EF4444'
+      : issue.priority?.toLowerCase() === 'medium'
+        ? '#F59E0B'
+        : '#9CA3AF';
+
+  const priorityBg =
+    issue.priority?.toLowerCase() === 'high'
+      ? '#EF444410'
+      : issue.priority?.toLowerCase() === 'medium'
+        ? '#F59E0B10'
+        : '#9CA3AF10';
+
+  const labelsHTML =
+    issue.labels
+      ?.map((label) => {
+        const { wrapper, text, icon } = getLabelConfig(label);
+
+        return `
+          <div class="flex items-center gap-1 ${wrapper} px-2 py-1 rounded-full">
+            ${icon}
+            <span class="${text} text-[10px] uppercase">${label}</span>
+          </div>
+        `;
+      })
+      .join('') || '';
+
   modalContent.innerHTML = `
-    <h3 class="text-2xl font-bold mb-4">${issue.title}</h3>
+    <h2 class="text-xl font-bold text-[#1a1f36] mb-2">${issue.title}</h2>
 
-    <div class="flex flex-wrap gap-3 mb-4">
-      <div class="badge ${issue.status === 'open' ? 'badge-success' : 'badge-secondary'} uppercase">
-        ${issue.status}
-      </div>
-      <div class="text-sm">
-        Opened by <strong>${issue.author}</strong> • ${new Date(issue.createdAt).toLocaleDateString('en-GB')}
-      </div>
+    <div class="flex items-center gap-2 mb-4 text-xs text-slate-500">
+
+      <span style="background:${statusColor}"
+      class="text-white px-2.5 py-0.5 rounded-full uppercase">
+      ${issue.status}
+      </span>
+
+      <span>•</span>
+      <span>By ${issue.author}</span>
+
+      <span>•</span>
+      <span>${new Date(issue.createdAt).toLocaleDateString()}</span>
+
     </div>
 
-    <p class="mb-6 whitespace-pre-wrap">${issue.description || 'No description available.'}</p>
-
-    <div class="flex flex-wrap gap-2 mb-6">
-      ${issue.labels?.map((l) => `<div class="badge badge-outline">${l}</div>`).join('') || '<span class="text-gray-500">No labels</span>'}
+    <div class="flex gap-3 flex-wrap mb-4">
+      ${labelsHTML}
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+    <p class="text-slate-500 text-sm leading-snug mb-6">
+      ${issue.description || 'No description available.'}
+    </p>
+
+    <div class="bg-[#f8faff] rounded-xl p-4 flex justify-between items-center mb-6 border border-slate-50">
+
       <div>
-        <p class="font-medium">Assignee</p>
-        <p class="mt-1">${issue.assignee || 'Unassigned'}</p>
+        <p class="text-slate-400 text-xs font-medium">Assignee</p>
+        <p class="text-[#1a1f36] text-sm font-bold">
+          ${issue.assignee || 'Unassigned'}
+        </p>
       </div>
-      <div>
-        <p class="font-medium">Priority</p>
-        <p class="mt-1 uppercase font-medium">${issue.priority}</p>
+
+      <div class="text-right">
+        <p class="text-slate-400 text-xs font-medium mb-1">Priority</p>
+
+        <span style="color:${priorityColor}; background:${priorityBg}"
+        class="px-4 py-0.5 rounded-full text-sm font-semibold">
+        ${issue.priority}
+        </span>
       </div>
+
     </div>
   `;
 
@@ -158,15 +311,19 @@ async function fetchAllIssues() {
     const response = await fetch(
       'https://phi-lab-server.vercel.app/api/v1/lab/issues'
     );
+
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
     const data = await response.json();
+
     if (data.status !== 'success') throw new Error(data.message || 'API error');
 
     allIssues = data.data || [];
+
     renderIssues(getFilteredIssues());
   } catch (err) {
     console.error(err);
+
     showError(`Failed to load issues: ${err.message}`);
   } finally {
     toggleLoading(false);
@@ -183,29 +340,35 @@ async function searchIssues(query) {
 
   try {
     const url = `https://phi-lab-server.vercel.app/api/v1/lab/issues/search?q=${encodeURIComponent(query)}`;
+
     const response = await fetch(url);
+
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
     const data = await response.json();
+
     if (data.status !== 'success')
       throw new Error(data.message || 'Search error');
 
     const results = data.data || [];
-    allIssues = results; 
-    currentFilter = 'all'; 
+
+    allIssues = results;
+    currentFilter = 'all';
+
     setActiveTab(allBtn);
+
     renderIssues(results);
   } catch (err) {
     console.error(err);
+
     showError(`Search failed: ${err.message}`);
   } finally {
     toggleLoading(false);
   }
 }
 
-// Event Listeners (dashboard only)
+// Event Listeners
 
-// Tabs
 document.getElementById('filterButtons')?.addEventListener('click', (e) => {
   if (!e.target.classList.contains('btn')) return;
 
@@ -214,11 +377,13 @@ document.getElementById('filterButtons')?.addEventListener('click', (e) => {
   if (e.target.id === 'closedIssuesBtn') currentFilter = 'closed';
 
   setActiveTab(e.target);
+
   renderIssues(getFilteredIssues());
 });
 
 searchBtn?.addEventListener('click', () => {
   const query = searchInput?.value.trim() || '';
+
   searchIssues(query);
 });
 
@@ -227,3 +392,7 @@ searchInput?.addEventListener('keypress', (e) => {
     searchBtn?.click();
   }
 });
+
+// Initial Load
+
+fetchAllIssues();

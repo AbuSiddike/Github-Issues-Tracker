@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="./assets/github-logo.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Github Issue Tracker</title>
+
+  <link rel="stylesheet" href="./tailwind_styles/output.css" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap"
+    rel="stylesheet"
+  />
+
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+  />
+
+  <style>
+    body {
+      font-family: 'Geist', sans-serif;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-100">
+
+<header class="bg-base-100 shadow-sm">
+  <nav
+    class="container mx-auto px-4 py-4 flex justify-between items-center flex-wrap gap-4"
+  >
+    <div class="flex items-center gap-3">
+      <img src="./assets/github-logo.png" class="w-10" />
+      <h1 class="text-xl font-bold hidden md:block">
+        GitHub Issues Tracker
+      </h1>
+    </div>
+
+    <div class="join w-full max-w-md">
+      <input
+        id="searchInput"
+        type="text"
+        placeholder="Search issues..."
+        class="input input-bordered join-item w-full"
+      />
+      <button id="searchBtn" class="btn join-item">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+
+<main class="container mx-auto px-4 py-6">
+
+  <!-- Tabs -->
+  <div id="filterButtons" class="flex flex-wrap gap-2 mb-6">
+    <button id="allIssuesBtn" class="btn btn-primary">All</button>
+    <button id="openIssuesBtn" class="btn">Open</button>
+    <button id="closedIssuesBtn" class="btn">Closed</button>
+  </div>
+
+  <!-- Summary -->
+  <div class="bg-base-100 shadow rounded-lg p-6 mb-6">
+    <div
+      class="flex flex-col md:flex-row md:items-center md:justify-between gap-6"
+    >
+      <div class="flex items-center gap-4">
+
+        <div class="bg-purple-100 rounded-full p-3">
+          <img src="./assets/Aperture.png" class="w-8" />
+        </div>
+
+        <div>
+          <div class="text-2xl font-bold flex items-baseline gap-2">
+            <span id="issueCount">0</span>
+            <span class="text-xl">Issues</span>
+          </div>
+
+          <p class="text-gray-500">
+            Track and manage your project issues
+          </p>
+        </div>
+
+      </div>
+
+      <div class="flex gap-6 text-sm">
+        <div>
+          <i class="fa-solid fa-circle text-green-500"></i> Open
+        </div>
+        <div>
+          <i class="fa-solid fa-circle text-purple-500"></i> Closed
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Issues Grid -->
+  <div
+    id="issuesContainer"
+    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"
+  ></div>
+
+  <!-- Loading -->
+  <div id="loadingSpinner" class="hidden flex justify-center py-20">
+    <span class="loading loading-spinner loading-lg"></span>
+  </div>
+
+  <div id="errorMessage" class="hidden alert alert-error mt-6"></div>
+
+  <!-- Modal -->
+  <dialog id="issueModal" class="modal modal-bottom sm:modal-middle">
+    <div class="modal-box max-w-2xl">
+      <div id="modalContent"></div>
+
+      <div class="modal-action">
+        <button class="btn" onclick="issueModal.close()">
+          Close
+        </button>
+      </div>
+
+    </div>
+  </dialog>
+
+</main>
+
+<script src="./scripts/issues.js"></script>
+
+</body>
+</html>
